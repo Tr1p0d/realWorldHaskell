@@ -47,13 +47,11 @@ jRenderValue ( JNumber j ) = show j
 jRenderValue ( JBool True ) = "True"
 jRenderValue ( JBool False ) = "False"
 jRenderValue ( JNull )	= "JNull"
-
 jRenderValue ( JObject j ) = "{" ++ pairs j ++ "}"
 	where
 	 	pairs [] = ""
 		pairs ps = intercalate ", " (map renderPair ps)
 		renderPair (n,v) = show n ++ " : " ++ jRenderValue v
-
 jRenderValue ( JArray k ) = "[" ++ values k ++ "]"
 	where
 	 	values [] = ""
