@@ -20,9 +20,9 @@ instance PrettyPrintable String where
 	toPrettyPrint a = map toUpper a
 	fromPrettyPrint a = map toLower a
 
---instance (PrettyPrintable a) => PrettyPrintable [a] where
---	toPrettyPrint a = concat $ map toPrettyPrint a
---	fromPrettyPrint = undefined
+instance (PrettyPrintable a) => PrettyPrintable [a] where
+	toPrettyPrint a = concat $ map toPrettyPrint a
+	fromPrettyPrint = undefined
 
 instance PrettyPrintable [String] where
 	toPrettyPrint a = concat $ map toPrettyPrint a
@@ -32,4 +32,4 @@ instance PrettyPrintable [String] where
 instance (PrettyPrintable a) => PrettyPrintable [(String, a)] where
 	toPrettyPrint = undefined
 	fromPrettyPrint = undefined
-	
+
