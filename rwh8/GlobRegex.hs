@@ -6,26 +6,47 @@ module GlobRegex
 
 import Text.Regex.Posix((=~))
 
-globToRegex :: String -> String
-globToRegex cs = '^' : globToRegex' cs ++ "$"
+type GlobError = String
 
-globToRegex' :: String -> String
-globToRegex' "" = ""
-globToRegex' ('*':cs) 		= ".*" ++ globToRegex' cs
-globToRegex' ('?':cs) 		= '.' : globToRegex' cs
-globToRegex' ('[':'!':c:cs) = "[^" ++ c : charClass cs
-globToRegex' ('[':c:cs) 	= '[' : c : charClass cs
-globToRegex' ('[':_)		= error "unterminated character class"
-globToRegex' (c:cs)			= escape c ++ globToRegex' cs
+globToRegex :: String -> Either GlobError String
+globToRegex cs = case globToRegex' cs of
+	Right result 	-> Right ('^' : result ++ "$")
+	Left error		-> Left error
+
+globToRegex' :: String -> Either GlobError String
+globToRegex' "" 			= Right ""
+globToRegex' ('*':cs) 		= case globToRegex' cs of
+								Right result 	-> Right (".*" ++ result)
+								Left error		-> Left error
+globToRegex' ('?':cs) 		= case  globToRegex' cs of 
+								Right result	-> Right ('.' : result)
+								Left error		-> Left error
+globToRegex' ('[':'!':c:cs) = case charClass cs of
+								Right result 	-> Right ("[^" ++ c : result)
+								Left error		-> Left error
+globToRegex' ('[':c:cs) 	= case charClass cs of
+								Right res	-> Right ('[' : c : res)
+								Left err	-> Left err
+globToRegex' ('[':_)		= Left "unterminated character class"
+globToRegex' (c:cs)			= case globToRegex' cs of
+								Right res	-> Right (escape c ++ res)
+								Left err	-> Left err
 
 escape :: Char -> String
 escape c | elem c regex = '\\' : [c]
          | otherwise = [c]
 	where regex = "\\+()^$.{}]|"
 
-charClass :: String -> String
-charClass (']':cs) 			= ']' : globToRegex' cs
-charClass (c:cs)			= c : charClass cs
-charClass []				= error "unterminated character class"
+charClass :: String -> Either GlobError String
+charClass (']':cs) 			= case globToRegex' cs of
+								Right result 	-> Right (']' : result) 
+								Left error 		-> Left error
+charClass (c:cs)			= case charClass cs of
+								Right res	-> Right (c : res)
+								Left err	-> Left err
+charClass []				= Left "unterminated character class"
 
-matchesGlob = "12#"
+matchesGlob :: FilePath -> String -> Bool
+name `matchesGlob` pat = case globToRegex pat of
+	Right res 	-> (name =~ res)
+	Left err 	-> False
