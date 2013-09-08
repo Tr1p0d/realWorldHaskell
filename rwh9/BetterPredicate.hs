@@ -31,9 +31,16 @@ equalP f k = \w x y z -> f w x y z == k
 liftP :: (a -> b -> c) -> InfoP a -> b -> InfoP c
 liftP q f k  = \w x y z -> f w x y z `q` k
 
+liftP2 :: ( a -> b -> c ) -> InfoP a -> InfoP b -> InfoP c
+liftP2 q f g = \w x y z -> f w x y z `q` g w x y z 
+
+andP = liftP2 (&&)
+orP = liftP2 (||)
+
 greaterP, lesserP :: (Ord a) => InfoP a -> a -> InfoP Bool
 greaterP = liftP (>)
 lesserP = liftP (<)
+
 
 
 betterFind :: Predicate -> FilePath -> IO [FilePath]
