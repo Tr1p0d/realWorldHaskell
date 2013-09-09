@@ -41,8 +41,6 @@ greaterP, lesserP :: (Ord a) => InfoP a -> a -> InfoP Bool
 greaterP = liftP (>)
 lesserP = liftP (<)
 
-
-
 betterFind :: Predicate -> FilePath -> IO [FilePath]
 betterFind p path = getRecursiveContents path >>= filterM check
 	where check name = do
@@ -61,3 +59,12 @@ getFileSize path = handle ((\_ -> return Nothing) :: IOException -> IO (Maybe In
 
 myTest path _ (Just size) _ = takeExtension path == ".cpp" && size > 131072
 myTest _ _ _ _ = False
+
+liftPath :: (FilePath -> a) -> InfoP a
+liftPath f = \w x y z -> f w 
+
+myTest2 = (liftPath takeExtension ==? ".cpp") &&? (sizeP >? 131072)
+
+(==?) = equalP
+(&&?) = andP
+(>?) = greaterP
