@@ -18,6 +18,20 @@ type InfoP a = FilePath
 	-> ClockTime
 	-> a
 
+data Info = Info {
+	infoPath :: FilePath,
+	infoPerms :: Maybe Permissions,
+	infoSize :: Maybe Integer,
+	infoTime :: Maybe ClockTime,
+	} deriving (Eq, Ord, Show)
+
+getInfo :: FilePath -> IO Info
+
+traverse :: ([Info] -> [Info]) -> FilePath -> IO [Info]
+traverse order path = do
+	names <- getUsefulContents path
+	contents <- mapM getInfo (path : map (path </>) names)
+
 pathP :: InfoP FilePath
 pathP path _ _ _ = path
 
@@ -68,3 +82,5 @@ myTest2 = (liftPath takeExtension ==? ".cpp") &&? (sizeP >? 131072)
 (==?) = equalP
 (&&?) = andP
 (>?) = greaterP
+
+
