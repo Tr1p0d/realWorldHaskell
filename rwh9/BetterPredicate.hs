@@ -1,7 +1,7 @@
 import Control.Monad ( filterM )
-import System.Directory (Permissions(..), getModificationTime, getPermissions)
+import System.Directory ( Permissions(..), getModificationTime, getPermissions)
 import System.Time (ClockTime(..))
-import System.FilePath (takeExtension)
+import System.FilePath ((</>), takeExtension)
 import Control.Exception (bracket, handle, IOException )
 import System.IO (IOMode(..), hClose, hFileSize, openFile)
 import RecursiveContents (getRecursiveContents)
@@ -17,20 +17,6 @@ type InfoP a = FilePath
 	-> Maybe Integer
 	-> ClockTime
 	-> a
-
-data Info = Info {
-	infoPath :: FilePath,
-	infoPerms :: Maybe Permissions,
-	infoSize :: Maybe Integer,
-	infoTime :: Maybe ClockTime,
-	} deriving (Eq, Ord, Show)
-
-getInfo :: FilePath -> IO Info
-
-traverse :: ([Info] -> [Info]) -> FilePath -> IO [Info]
-traverse order path = do
-	names <- getUsefulContents path
-	contents <- mapM getInfo (path : map (path </>) names)
 
 pathP :: InfoP FilePath
 pathP path _ _ _ = path
