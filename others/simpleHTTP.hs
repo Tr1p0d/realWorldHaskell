@@ -15,7 +15,6 @@ testRide url = do
 	a <- simpleHTTP req
 	case a of
 		Left ErrorReset -> return "asd"--(ConnectionError)
-		Left ErrorClosed ->  return "asd"--(ConnectionError)
 		Left (ErrorParse a) -> return "asd"--( ParseError)
 		Left (ErrorMisc a) ->  return "asd"--( UnknownError)
 		otherwise -> do
